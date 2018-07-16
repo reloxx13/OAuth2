@@ -1,6 +1,6 @@
 {
     "name": "muffin/oauth2",
-    "description": "CakePHP 3 authentication using the league/oauth2-client family",
+    "description": "RELOXX13 FORK CakePHP 3 authentication using the league/oauth2-client family",
     "type": "cakephp-plugin",
     "keywords": [
         "cakephp",

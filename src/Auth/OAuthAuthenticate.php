@@ -159,13 +159,13 @@ class OAuthAuthenticate extends BaseAuthenticate
 		//			return FALSE;
 		//		}
 		//
-		//		if (!$result = $this->_touch($user))
-		//		{
-		//			return FALSE;
-		//		}
+		//				if (!$result = $this->_touch($user))
+		//				{
+		//					return FALSE;
+		//				}
 		
 		
-		$result = "";
+		$result = $rawData;
 		
 		$args = [$this->_provider, $result];
 		$this->dispatchEvent('Muffin/OAuth2.afterIdentify', $args);
@@ -202,6 +202,7 @@ class OAuthAuthenticate extends BaseAuthenticate
 					$options = [
 						"username" => $request->getData('username'),
 						"password" => $request->getData('password'),
+						"format"   => "json",
 					];
 				} else
 				{
@@ -223,53 +224,55 @@ class OAuthAuthenticate extends BaseAuthenticate
 		}
 		
 		$result = FALSE;
+		
+		$options["headers"] = array('Accept' => 'application/json',);
+		
 		try
 		{
 			$token = $provider->getAccessToken($grant, $options);
-			//			debug($token);
 			//			$token["body"]["access_token"] = $token->getToken();
 			
-			$t = array(
-				"access_token" => $token->getToken(),
-				"softwareid"   => Configure::read("OAUTH.SOFTWARE"),
-			);
 			
+			$token = json_decode(json_encode($token), TRUE);
 			
-			$params["body"] = http_build_query($t, NULL, '&');
-			$params["headers"] = [
-				'content-type' => 'application/x-www-form-urlencoded',
-			];
+			//			$t = array(
+			//				"access_token" => $token->getToken(),
+			//				"softwareid"   => Configure::read("OAUTH.SOFTWARE"),
+			//			);
+			//			$params["body"] = http_build_query($t, NULL, '&');
+			//			$params["headers"] = [
+			//				'content-type' => 'application/x-www-form-urlencoded',
+			//			];
 			
-			$request = $provider->getRequest(
-				"POST",
-				$this->getConfig('options.urlResourceOwnerDetails'),
-				$params
-			);
+			//			$request = $provider->getRequest(
+			//				"POST",
+			//				$this->getConfig('options.urlResourceOwnerDetails'),
+			//				$params
+			//			);
 			
-			$response = $provider->getResponse($request);
+			//			$response = $provider->getResponse($request);
 			
-			$DATA["token"] = json_decode(json_encode($token), TRUE);;
-			$DATA["userData"] = $response;
-			
-			
-			$params["body"] .= '&' . http_build_query(array("uid" => $DATA["userData"]["uid"]), NULL, '&');
-			
-			$request = $provider->getRequest(
-				"POST",
-				$this->getConfig('options.urlGetRoleData'),
-				$params
-			);
-			
-			$response = $provider->getResponse($request);
-			$response = array_shift($response)["softwarerights"][$this->getConfig('options.softwareID')];
-			$DATA["roleData"] = $response;
+			//			$DATA["userData"] = $response;
+			//
+			//
+			//			$params["body"] .= '&' . http_build_query(array("uid" => $DATA["userData"]["uid"]), NULL, '&');
+			//
+			//			$request = $provider->getRequest(
+			//				"POST",
+			//				$this->getConfig('options.urlGetRoleData'),
+			//				$params
+			//			);
+			//
+			//			$response = $provider->getResponse($request);
+			//			$response = array_shift($response)["softwarerights"][$this->getConfig('options.softwareID')];
+			//			$DATA["roleData"] = $response;
 			
 		} catch (Exception $e)
 		{
 			// Silently catch exceptions
 		}
 		
-		return $DATA;
+		return $token;
 	}
 	
 	/**
